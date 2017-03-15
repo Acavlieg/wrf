@@ -3,4 +3,5 @@ install:
 - sudo apt-get install perl bash csh m4 sed gawk gfortran netcdf-bin grads libnetcdf-dev libjasper-dev libmpich2-dev libpng-dev libz-dev
 
 script:
-- make 
+- make -j8 WRFV3/run/wrf.exe
+- make -j8 WPS/ungrib.exe
