@@ -1,48 +1,21 @@
-#TODO: make native date-format 2014-01-01_00 or so, and remove -_ when needed (downloading)
-#TODO: consistently rename files with : to the same file containing | or something else make can handle. Or maybe remove the date in the filename completely if make needs that?
-
 all:  WPS/ungrib.exe
 	echo All	
 
-#To actually run a simulation
 
 #TODO: do sed magic to search-replace on start_date en end_date. How to extract those values from % ?
 run/%/namelist.wps: namelist.wps
 	cp $< $@ 
-
-run/%/geogrid: WPS/geogrid
-	ln -s $(CURDIR)/$< $@
-
-run/%/geo_em.d01.nc run/%/geo_em.d02.nc: WPS/geogrid.exe run/%/geogrid run/%/namelist.wps
-	(cd `dirname $@` && \
-	$(CURDIR)/WPS/geogrid.exe)
 
 #http://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.2014010100/gfs.t00z.pgrb2f00
 run/gfs/%:
 	mkdir -p `dirname $@` && \
 	wget -O $@ http://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.$@
 
-run/%/GRIBFILE.AAA: $(CURDIR)/WPS/link_grib.csh $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f00 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f03 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f06 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f09 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f12 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f15 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f18 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f21 $(CURDIR)/run/gfs/%/gfs.t00z.pgrb2f24
-	(mkdir -p `dirname $@` && \
-	cd `dirname $@` && \
-	csh $^)
-
 run/%/Vtable: $(CURDIR)/WPS/ungrib/Variable_Tables/Vtable.GFS
 	ln -s $< $@
 
-#TODO: hoe doe je dit algemener?
-run/%/FILE\:2014-01-01_00: run/%/Vtable WPS/ungrib.exe run/%/GRIBFILE.AAA run/%/namelist.wps
-	(cd `dirname $@` && \
-	ungrib.exe)
-
 run/%/metgrid: WPS/metgrid
 	ln -s $(CURDIR)/$< $@
-
-
-#TODO: ook algemener
-run/%/met_em.d01.2014-01-01_00\:00\:00.nc: WPS/metgrid.exe run/%/metgrid run/%/namelist.wps
-	(cd `dirname $@` && \
-	$(CURDIR)/$<)
 
 
 #Building WPS
